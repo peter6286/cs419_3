@@ -16,7 +16,6 @@ def decrypt(key,cipher,plain):
     # decrypt
     while True:
         c = cipher_file.read(1)
-        print(c)
         if not c:
             break
 
