@@ -56,7 +56,7 @@ def pad(m):
         #temp_list = []
         for i in range(BLOCK_SIZE):
             temp_list.append(BLOCK_SIZE)
-            print(temp_list)
+            #print(temp_list)
         #m = bytes(temp_list)
     # return amount based on how many bytes left out of BLOCK_SIZE
 
@@ -65,11 +65,11 @@ def pad(m):
     # temp_list = []
     for val in m:
         temp_list.append(val)
-        print(temp_list)
+        #print(temp_list)
     # tack on the remaining padding
     for idx in range(rem):
         temp_list.append(rem)
-        print(temp_list)
+        #print(temp_list)
 
     return bytes(temp_list)
 
@@ -96,6 +96,15 @@ def xor(plain, other):
         res.append(plain[idx] ^ other[idx])
     return bytes(res)
 
+def init(password,m):
+    seed = sbdm(password)
+    iv = create_IV(seed)
+    temp = xor(m, iv)
+    key_stream = create_IV(iv[-1])
+    swap = bs(temp, key_stream)
+    cipher = xor(swap, key_stream)
+    return cipher,key_stream
+
 
 def encrypt(password,var1,var2):
 
@@ -106,18 +115,10 @@ def encrypt(password,var1,var2):
     if not start_file:
         print("File does not exist")
         return -1
-
-    # create the seed
-    seed = sbdm(password)
-    #print("the seed is" + str(seed))
-
-    # create the iv
-    iv = create_IV(seed)
-    # print('iv: {}'.format(iv))
-
     run = True
     first = True
     cipher = []
+    key_stream = []
 
     # read data block by block
     while run:
@@ -128,30 +129,19 @@ def encrypt(password,var1,var2):
         if len(m) != BLOCK_SIZE:
             # pad
             m = pad(m)
+            #print(m)
             run = False
 
-        # xor plain and iv / old cipher
         if first:
             first = False
-            # XOR
-            temp = xor(m, iv)
-            # Gen new key_stream
-            key_stream = create_IV(iv[-1])
+            cipher,key_stream=init(password,m)
+            end_file.write(cipher)
         else:
-            # XOR
             temp = xor(m, cipher)
             key_stream = create_IV(key_stream[-1])
-
-        # swap using key stream
-        swap = bs(temp, key_stream)
-
-        # xor plain and key stream
-        cipher = xor(swap, key_stream)
-
-        # print('after xor: {}'.format(list(cipher)))
-
-        # write cipher
-        end_file.write(cipher)
+            swap = bs(temp, key_stream)
+            cipher = xor(swap, key_stream)
+            end_file.write(cipher)
 
     start_file.close()
     end_file.close()
