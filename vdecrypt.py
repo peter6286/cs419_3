@@ -6,9 +6,9 @@ def decrypt(key,cipher,plain):
         return
 
     # define files
-    key_file = open(key, "r")
+    key_file = open(key, "rb")
     cipher_file = open(cipher, "rb")
-    plain_file = open(plain, "w+")
+    plain_file = open(plain, "wb+")
     if not (plain_file and cipher_file):
         print("Error with opening files")
         return
@@ -18,19 +18,19 @@ def decrypt(key,cipher,plain):
         c = cipher_file.read(1)
         if not c:
             break
-
         if key_file:
             k = key_file.read(1)
+
             if not k:
                 key_file.seek(0)
                 k = key_file.read(1)
         else:
             k = 0
 
-        #p = int.from_bytes(c, byteorder=sys.byteorder) - int.from_bytes(k, byteorder=sys.byteorder) + 256
-        p = ord(c) - ord(k) + 256
+        p = int.from_bytes(c, byteorder=sys.byteorder) - int.from_bytes(k, byteorder=sys.byteorder) + 256
+        #p = ord(c) - ord(k) + 256
         p %= 256
-        plain_file.write(chr(p))
+        plain_file.write(int.to_bytes(p,byteorder= sys.byteorder,length = 1))
 
     key_file.close()
     plain_file.close()

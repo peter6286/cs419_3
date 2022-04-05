@@ -9,10 +9,10 @@ import sys
 
 def encrypt(key,cipher,plain):
 
-    key_file = open(key, "r")
+    key_file = open(key, "rb")
 
-    plain_file = open(cipher, "r")
-    cipher_file = open(plain, "w+")
+    plain_file = open(cipher, "rb")
+    cipher_file = open(plain, "wb+")
     if not (plain_file and cipher_file):
         print("Error with opening files")
         return
@@ -34,15 +34,10 @@ def encrypt(key,cipher,plain):
              #   kk = bytes(k, 'utf-8')
         else:
             k = 0
-        #c = int.from_bytes(bytes(p,'utf-8'), byteorder=sys.byteorder) + int.from_bytes(bytes(k,'utf-8'), byteorder=sys.byteorder)
-        d = ord(p) + ord(k)
-        #c %= 256
-        d %= 256
-        #print(d)
-        #print(c)
-        #cipher_file.write(int.to_bytes(c, byteorder=sys.byteorder, length=1))
-        #cipher_file.write(int.to_bytes(c, byteorder=sys.byteorder, length=1))
-        cipher_file.write(chr(d))
+
+        c = int.from_bytes(p, byteorder=sys.byteorder) + int.from_bytes(k, byteorder=sys.byteorder)
+        c %= 256
+        cipher_file.write(int.to_bytes(c, byteorder=sys.byteorder, length=1))
 
     key_file.close()
     plain_file.close()
